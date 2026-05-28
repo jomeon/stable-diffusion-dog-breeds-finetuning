@@ -75,8 +75,25 @@ The LoRA execution operated efficiently (~8s/iteration). Conversely, the full-pa
 
 ### 9. Results and Analysis
 
+The qualitative evaluation of the fine-tuned models focuses on morphological accuracy, texture synthesis, and prompt adherence. By comparing the low-rank adaptation (LoRA) against the full-parameter update (DreamBooth), we can assess the generative fidelity against the computational overhead.
 
-* **Base Pre-Trained Model:** Generates anatomically acceptable dogs but defaults to generic canine features, failing to capture strict breed-specific nuances.
-* **Unified LoRA:** Demonstrates improved breed shapes but occasionally exhibits texture bleeding across the 5 targeted breeds.
-* **Isolated LoRA:** Achieves the highest alignment with prompt criteria, perfectly rendering specific skeletal proportions (e.g., elongated torso of the Dachshund) and coat textures while maintaining high intra-class diversity (various angles and backgrounds).
-* **Hardware Conclusion:** The project successfully demonstrates that resource-constrained hardware can achieve state-of-the-art generative fine-tuning through strict parameter isolation (LoRA) and VRAM management strategies.
+#### Visual Evaluation: DreamBooth vs. Class-Isolated LoRA
+
+| DreamBooth (Pembroke Welsh Corgi) | Class-Isolated LoRA (Samoyed) |
+| :---: | :---: |
+| <img width="400" alt="DreamBooth Corgi" src="https://github.com/user-attachments/assets/6b7d37ca-4387-4fa8-a30a-23b301d8f47d" /> | <img width="400" alt="LoRA Samoyed" src="https://github.com/user-attachments/assets/075298d9-cb39-4522-b412-4e24ccd2f86c" /> |
+| *Prompt: "a photo of sks dog, highly detailed, realistic, 4k"* | *Prompt: "a photo of samoyed dog, highly detailed, realistic, 4k"* |
+
+**Analysis of the DreamBooth Generation (Corgi):**
+The full-parameter fine-tuning via DreamBooth yielded exceptional subject fidelity. As observed in the Corgi output, the model perfectly captured the breed's distinct anatomical constraints, specifically the disproportionate torso-to-leg ratio (achondroplasia), the broad cranial structure, and the erect ears. The lighting and depth of field are highly realistic, proving that DreamBooth's method of binding a rare token (`sks`) to a specific concept effectively overrides the base model's generic priors. However, this level of fidelity required immense computational resources, leading to severe VRAM bottlenecks during the training phase.
+
+**Analysis of the Class-Isolated LoRA Generation (Samoyed):**
+Conversely, the Isolated LoRA approach demonstrated remarkable efficiency in capturing complex textural features. The generated Samoyed exhibits highly accurate double-coat texturing, appropriate volumetric fur density, and precise breed-specific facial proportions (the characteristic "spitz" muzzle and dark pigmentation around the lips and eyes). This output confirms that low-rank matrix injection ($\Delta W$) is highly capable of driving advanced textural and structural adaptations. It achieved a visual quality nearly indistinguishable from full-parameter tuning, but at a fraction of the computational and storage cost.
+
+#### Global Comparative Conclusions
+Based on the end-to-end execution of the testing pipeline, the following final evaluations were made across all training paradigms:
+
+* **Base Pre-Trained Model (Stable Diffusion v1.5):** Generates anatomically acceptable dogs but defaults to generic canine features, failing to capture strict, highly specific breed nuances.
+* **Unified LoRA (Paradigm A):** Demonstrates improved breed shapes but occasionally exhibits texture bleeding (cross-contamination) across the 5 targeted breeds due to the shared mathematical matrices.
+* **Isolated LoRA (Paradigm B):** Achieves the highest alignment with prompt criteria without contamination. It perfectly renders specific skeletal proportions (e.g., the elongated torso of the Dachshund) and coat textures while maintaining high intra-class diversity (rendering various angles and backgrounds).
+* **Hardware & Efficiency Conclusion:** The project successfully demonstrates that resource-constrained hardware (e.g., 6GB VRAM) can achieve state-of-the-art generative fine-tuning. Strict parameter isolation (LoRA) prevents the severe memory thrashing deadlock witnessed during the DreamBooth trial, proving LoRA to be the objectively superior engineering choice for consumer-grade infrastructural limits.
